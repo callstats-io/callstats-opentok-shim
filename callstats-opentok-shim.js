@@ -1,4 +1,4 @@
-/*! callstats-opentok-shim  version = 1.0.3 */
+/*! callstats-opentok-shim  version = 1.0.4 */
 let CallstatsOpenTok = (function() {
   let connections   = new Map();
   let callstatsConn = null;
@@ -19,14 +19,13 @@ let CallstatsOpenTok = (function() {
   }
 
   function isPCTPc(pcConfig) {
-    if (!pcConfig.iceServers) {
-      return false;
-    }
-    const len = pcConfig.iceServers.length;
-    for (let i = 0; i < len; i++) {
-      const username = pcConfig.iceServers[i].username;
-      if (username && username.includes('pct')) {
-        return true;
+    if (pcConfig && pcConfig.iceServers) {
+      const len = pcConfig.iceServers.length;
+      for (let i = 0; i < len; i++) {
+        const username = pcConfig.iceServers[i].username;
+        if (username && username.includes('pct')) {
+          return true;
+        }
       }
     }
     return false;
@@ -264,6 +263,7 @@ let CallstatsOpenTok = (function() {
         }
       };
 
+      /*
       const origSetRemoteDescription = pc.setRemoteDescription.bind(pc);
       pc.setRemoteDescription = function (...args) {
         if (args.length <= 1) {
@@ -276,28 +276,15 @@ let CallstatsOpenTok = (function() {
           const failureWrap = wrapError(pc, 'setRemoteDescription', failure);
           return origSetRemoteDescription(sdp, success, failureWrap);
         }
-      };
+      };*/
 
-      const origAddIceCandidate = pc.addIceCandidate.bind(pc);
-      pc.addIceCandidate = function(...args) {
-        if (args.length <= 1) {
-          return origAddIceCandidate(...args).catch(ex => {
-            reportError(pc, 'addIceCandidate');
-            throw ex;
-          });
-        } else {
-          const [candidate, success, failure] = args;
-          const failureWrap = wrapError(pc, 'addIceCandidate', failure);
-          return origAddIceCandidate(candidate, success, failureWrap);
-        }
-      };
-
-      pc.onsignalingstatechange = function(event) {
-        if (event.signalingState == 'closed') {
-          connections.delete(uuid);
-        }
-      };
-
+      if (pc.addEventListener){
+        pc.addEventListener('signalingstatechange',function() {
+          if (pc.signalingState == 'closed') {
+            connections.delete(uuid);
+          }
+        });
+      }
       return pc;
     };
 
