@@ -72,6 +72,14 @@ let CallstatsOpenTok = (function() {
     return copy;
   }
 
+  function sendLogs(domError) {
+    if (!sessionId) {
+      console.warn('Not initialized');
+      return;
+    }
+    callstatsConn.reportError(null, sessionId, callstatsConn.webRTCFunctions.applicationError, domError);
+  }
+
   function sendFabricEvent(eventName) {
     if (!sessionId) {
       console.warn('Not initialized');
@@ -307,6 +315,7 @@ let CallstatsOpenTok = (function() {
     getConnections: getConnections,
     sendUserFeedback: sendUserFeedback,
     sendFabricEvent: sendFabricEvent,
+    sendLogs: sendLogs,
     fabricEvents: fabricEvents,
   };
 })();
