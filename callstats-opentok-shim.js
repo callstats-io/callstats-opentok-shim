@@ -1,4 +1,4 @@
-/*! callstats-opentok-shim  version = 1.0.4 */
+/*! callstats-opentok-shim  version = 1.0.5 */
 let CallstatsOpenTok = (function() {
   let connections   = new Map();
   let callstatsConn = null;
